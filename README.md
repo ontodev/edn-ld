@@ -36,7 +36,7 @@ Try out EDN-LD by cloning this project and starting a REPL:
     $ cd edn-ld
     $ lein repl
     nREPL server started ...
-    user=> (use 'edn-ld.core 'edn.common)
+    user=> (use 'edn-ld.core 'edn-ld.common)
     nil
     user=> (require '[clojure.string :as string])
     nil
