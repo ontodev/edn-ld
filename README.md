@@ -98,7 +98,7 @@ IRI                                      | Contraction
 
 We'll put this naming information in a *context* map:
 
-    user=> (def context {:dc "http://purl.org/dc/elements/1.1/", :ex "http://example.com/", nil :ex, :title, :dc:title, :author :dc:author})
+    user=> (def context {:dc "http://purl.org/dc/elements/1.1/", :ex "http://example.com/", nil :ex, :title :dc:title, :author :dc:author})
     #'user/context
 
 The `nil` key indicates the default prefix `:ex`. Now we can use the context to expand contractions and to contract IRIs:
@@ -118,6 +118,20 @@ Sometimes we also want to *resolve* a name to an IRI. We can define a resources 
 
     user=> (def resources {"Homer" :Homer, "The Iliad" :the-iliad})
     #'user/resources
+
+We should include this information in our data by assigning a special `:subject-iri` to each of our maps. We can do this one at a time with `assoc`:
+
+    user=> (def book (assoc (first data) :subject-iri :the-iliad))
+    #'user/book
+    user=> book
+    {:title "The Iliad", :author "Homer", :subject-iri :the-iliad}
+
+Or we can use a higher-order function to find the title from the resources map:
+
+    user=> (def books (mapv #(assoc % :subject-iri (get resources (:title %))) data))
+    #'user/books
+    user=> books
+    [{:title "The Iliad", :author "Homer", :subject-iri :the-iliad}]
 
 Now it's time to convert our book data to "triples", i.e. statements about things to put in our graph. A triple consists of a subject, a predicate, and an object:
 
@@ -145,9 +159,11 @@ The `objectify` function takes a resource map and a value, and determines whethe
     user=> (objectify resources "Homer")
     :Homer
 
-Now we can treat each map as a set of statements about a resources, and `triplify` it to a lazy sequence of triples. The format will be "flat triples", a list with slots for: subject, predicate, object, type, and lang. The `triplify` function takes our resource map, they keyword to use for setting the subject, and a map of data. It returns a lazy sequence of flat triples.
+Now we can treat each map as a set of statements about a resources, and `triplify` it to a lazy sequence of triples. The format will be "flat triples", a list with slots for: subject, predicate, object, type, and lang.
 
-    user=> (def triples (triplify resources :the-iliad (first data)))
+The `triplify` function takes our resource map, the keyword to use for setting the subject, and a map of data that includes a `:subject-iri` key. It returns a lazy sequence of flat triples.
+
+    user=> (def triples (triplify resources book))
     #'user/triples
     user=> (vec triples)
     [[:the-iliad :title "The Iliad" :xsd:string] [:the-iliad :author :Homer]]
@@ -172,7 +188,7 @@ We work with these data structures like any other Clojure data, using `merge`, `
     user=> (def subjects+ (assoc-in subjects [:the-iliad :rdf:type] #{:book}))
     #'user/subjects+
 
-Finally, we can write to standard linked data formats, such as RDFXML:
+Now, we can write to standard linked data formats, such as RDFXML:
 
     user=> (edn-ld.rdfxml/write-string context+ (expand-all context+ subjects+))
     <?xml version='1.0' encoding='UTF-8'?>
@@ -183,12 +199,29 @@ Finally, we can write to standard linked data formats, such as RDFXML:
          </ex:book>
     </rdf:RDF>
 
+One more thing before we're done: *named graphs*. A graph is just a set of triples. When we want to talk about a particular graph, we give it a name: an IRI, of course. Then we can talk about sets of named graphs when we want to compare them, merge them, etc. The official name for a set of graphs is an "[RDF dataset](http://www.w3.org/TR/rdf11-concepts/#section-dataset)". A dataset includes "default graph" with no name.
+
+By adding the name of a graph, our *triples* become *quads* ("quadruples"). We define a FlatQuad and some new functions to handle them.
+
+    user=> (def library [(assoc book :graph-iri :library)])
+    #'user/library
+    user=> library
+    [{:title "The Iliad", :author "Homer", :subject-iri :the-iliad, :graph-iri :library}]
+    user=> (def quads (quadruplify-all resources library))
+    #'user/quads
+    user=> (vec quads)
+    [[:library :the-iliad :title "The Iliad" :xsd:string] [:library :the-iliad :author :Homer]]
+    user=> (graphify quads)
+    {:library {:the-iliad {:title #{{:value "The Iliad"}}, :author #{:Homer}}}}
+
+Note that RDFXML format doesn't support named graphs and quads.
+
 
 ## To Do
 
-- generalize to RDF datasets (collections of graphs)
-- finish RDFXML reader and writer
-- use Apache Jena for reading and writing?
+- use Apache Jena for reading and writing
+- finish streaming RDFXML reader and writer
+- ClojureScript support? Would require different libraries for reading and writing
 
 
 ## License
