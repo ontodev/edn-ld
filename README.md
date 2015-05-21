@@ -1,5 +1,7 @@
 # EDN-LD
 
+[![Build Status](https://travis-ci.org/ontodev/edn-ld.svg?branch=master)](https://travis-ci.org/ontodev/edn-ld)
+
 EDN-LD is a set of conventions and a library for working with [Linked Data (LD)](http://linkeddata.org) using [Extensible Data Notation (EDN)](https://github.com/edn-format/edn) and the [Clojure programming language](http://clojure.org). EDN-LD builds on EDN and [JSON-LD](http://json-ld.org), but is not otherwise affiliated with those projects.
 
 This project is in early development!
