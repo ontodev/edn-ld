@@ -30,8 +30,8 @@
      string/split-lines
      (filter #(.startsWith % "    "))
      (map #(string/replace % #"^    " ""))
-     (remove #(.startsWith % "$"))
-     (remove #(.startsWith % ";"))
+     (remove #(re-find #"^(\-|\+|\*) " %)) ; remove nested unordered list items
+     (remove #(re-find #"^(\$|;)" %)) ; remove shell prompts and comments
      (drop-while #(not (.startsWith % prompt)))
      (drop 4) ; ignore 'use' and 'require'
      (partition-by #(.startsWith % prompt))
