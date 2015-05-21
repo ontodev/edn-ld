@@ -72,7 +72,7 @@
         (str (get context (keyword prefix)) local))
       :else
       (str (expand context (get context nil)) (name input)))
-  (catch StackOverflowError e input)))
+    (catch StackOverflowError e input)))
 
 (defn expand-all
   "Given a Context and some collection,
@@ -125,11 +125,11 @@
        memoized-sort-prefixes
        (filter #(.startsWith input (first %)))
        (map
-         (fn [[uri prefix]]
-           (string/replace-first
-             input
-             uri
-             (if prefix (str (name prefix) ":") ""))))
+        (fn [[uri prefix]]
+          (string/replace-first
+           input
+           uri
+           (if prefix (str (name prefix) ":") ""))))
        (map keyword)
        first))
 
@@ -302,9 +302,9 @@
 
 (def FlatTriple
   (s/either
-    [ContractedSubject ContractedPredicate ContractedSubject]
-    [ContractedSubject ContractedPredicate Lexical Datatype]
-    [ContractedSubject ContractedPredicate Lexical Datatype Lang]))
+   [ContractedSubject ContractedPredicate ContractedSubject]
+   [ContractedSubject ContractedPredicate Lexical Datatype]
+   [ContractedSubject ContractedPredicate Lexical Datatype Lang]))
 
 (def FlatTriples [FlatTriple])
 
@@ -398,16 +398,16 @@
   "Given a sequence of FlatTriples, return a SubjectMap."
   [flat-triples]
   (reduce
-    (fn [coll [subject predicate object datatype lang]]
-      (update-in
-        coll
-        [subject predicate]
-        (fnil conj #{})
-        (if datatype
-          (literal object datatype lang)
-          object)))
-    nil
-    flat-triples))
+   (fn [coll [subject predicate object datatype lang]]
+     (update-in
+      coll
+      [subject predicate]
+      (fnil conj #{})
+      (if datatype
+        (literal object datatype lang)
+        object)))
+   nil
+   flat-triples))
 
 ;; We can also go the other way, from SubjectMap to FlatTriples.
 
@@ -415,11 +415,11 @@
   "Given a SubjectMap, return a lazy sequnce of FlatTriples."
   [subject-map]
   (apply
-    concat
-    (for [[subject predicate-map] subject-map
-          [predicate object-set]  predicate-map
-          object                  object-set]
-      (flatten-triples subject predicate object))))
+   concat
+   (for [[subject predicate-map] subject-map
+         [predicate object-set]  predicate-map
+         object                  object-set]
+     (flatten-triples subject predicate object))))
 
 ;; # Quads
 
@@ -445,11 +445,11 @@
 
 (def FlatQuads
   (s/either
-    [ContractedGraphName ContractedSubject ContractedPredicate
-     ContractedSubject]
-    [ContractedGraphName ContractedSubject ContractedPredicate Lexical Datatype]
-    [ContractedGraphName ContractedSubject ContractedPredicate Lexical Datatype
-     Lang]))
+   [ContractedGraphName ContractedSubject ContractedPredicate
+    ContractedSubject]
+   [ContractedGraphName ContractedSubject ContractedPredicate Lexical Datatype]
+   [ContractedGraphName ContractedSubject ContractedPredicate Lexical Datatype
+    Lang]))
 
 (def FlatQuads [FlatQuads])
 
@@ -502,26 +502,25 @@
   "Given a sequence of FlatQuads, return a GraphMap."
   [flat-quads]
   (reduce
-    (fn [coll [graph subject predicate object datatype lang]]
-      (update-in
-        coll
-        [graph subject predicate]
-        (fnil conj #{})
-        (if datatype
-          (literal object datatype lang)
-          object)))
-    nil
-    flat-quads))
+   (fn [coll [graph subject predicate object datatype lang]]
+     (update-in
+      coll
+      [graph subject predicate]
+      (fnil conj #{})
+      (if datatype
+        (literal object datatype lang)
+        object)))
+   nil
+   flat-quads))
 
 (defn flatten-graphs
   "Given a GraphMap, return a lazy sequnce of FlatQuads."
   [graph-map]
   (apply
-    concat
-    (for [[graph subject-map]     graph-map
-          [subject predicate-map] subject-map
-          [predicate object-set]  predicate-map
-          object                  object-set]
-    (map (partial concat [graph])
-         (flatten-triples subject predicate object)))))
-
+   concat
+   (for [[graph subject-map]     graph-map
+         [subject predicate-map] subject-map
+         [predicate object-set]  predicate-map
+         object                  object-set]
+     (map (partial concat [graph])
+          (flatten-triples subject predicate object)))))

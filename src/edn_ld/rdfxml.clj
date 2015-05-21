@@ -51,17 +51,17 @@
   "Create and return a Woodstox XMLStreamReader2 for a given path.
    An XMLInputFactory is optional."
   (^XMLStreamReader2 [path]
-    (create-stream-reader shared-input-factory path))
+   (create-stream-reader shared-input-factory path))
   (^XMLStreamReader2 [^XMLInputFactory2 input-factory path]
-    (.createXMLStreamReader input-factory (io/file path))))
+   (.createXMLStreamReader input-factory (io/file path))))
 
 (defn create-stream-writer
   "Create and return a Woodstox XMLStreamWriter2 for a given path.
    An XMLOutputFactory is optional."
   (^XMLStreamWriter2 [path]
-    (create-stream-writer shared-output-factory path))
+   (create-stream-writer shared-output-factory path))
   (^XMLStreamWriter2 [^XMLOutputFactory2 output-factory path]
-    (.createXMLStreamWriter output-factory (clojure.java.io/writer path))))
+   (.createXMLStreamWriter output-factory (clojure.java.io/writer path))))
 
 ; To read an XML file lazily
 ; we create a wrapped function using lazy-seq.
@@ -69,19 +69,19 @@
 ; http://stackoverflow.com/a/19656800
 
 #_(defn lazy-read-ok
-  [csv-file]
-  (with-open [in-file (io/reader csv-file)]
-    (frequencies (map #(nth % 2) (csv/read-csv in-file)))))
+    [csv-file]
+    (with-open [in-file (io/reader csv-file)]
+      (frequencies (map #(nth % 2) (csv/read-csv in-file)))))
 
 (defn lazy-read
   [path]
   (let [reader (create-stream-reader path)
         lazy (fn lazy [wrapped]
                (lazy-seq
-                 (if (.hasNext reader)
-                   (do (.next reader)
-                       (cons (.getEventType reader) (lazy reader)))
-                   (.close reader))))]
+                (if (.hasNext reader)
+                  (do (.next reader)
+                      (cons (.getEventType reader) (lazy reader)))
+                  (.close reader))))]
     (lazy reader)))
 
 (defn advance
@@ -96,10 +96,10 @@
              (= (.getLocalName reader) "RDF"))
     (->> (range 0 (.getNamespaceCount reader))
          (map
-           (fn [i]
-             [(when-not (string/blank? (.getNamespacePrefix reader i))
-                (.getNamespacePrefix reader i))
-              (.getNamespaceURI reader i)]))
+          (fn [i]
+            [(when-not (string/blank? (.getNamespacePrefix reader i))
+               (.getNamespacePrefix reader i))
+             (.getNamespaceURI reader i)]))
          (into {}))))
 
 (defn get-element-iri
@@ -121,10 +121,10 @@
   (when (.isStartElement reader)
     (->> (range 0 (.getAttributeCount reader))
          (map
-           (fn [i]
-             [(str (get context (.getAttributePrefix reader i))
-                   (.getAttributeLocalName reader i))
-              (.getAttributeValue reader i)]))
+          (fn [i]
+            [(str (get context (.getAttributePrefix reader i))
+                  (.getAttributeLocalName reader i))
+             (.getAttributeValue reader i)]))
          (into {}))))
 
 (defn read-triple
@@ -158,8 +158,7 @@
          [subject element (get-text reader) (str rdf "langString") lang]]
         ; predicate typed literal assertion
         :else
-        [subject [subject element (get-text reader) datatype nil]]
-        ))))
+        [subject [subject element (get-text reader) datatype nil]]))))
 
 (defn myread
   [path]
@@ -282,9 +281,9 @@
    (write-file path default-context subject-map))
   ([path context subject-map]
    (write-subjects
-     (create-stream-writer path)
-     context
-     subject-map)))
+    (create-stream-writer path)
+    context
+    subject-map)))
 
 (defn write-string
   "Given an optional context and a subject map,
@@ -294,9 +293,9 @@
   ([context subject-map]
    (let [writer (java.io.StringWriter.)]
      (write-subjects
-       (.createXMLStreamWriter shared-output-factory writer)
-       context
-       subject-map)
+      (.createXMLStreamWriter shared-output-factory writer)
+      context
+      subject-map)
      (.toString writer))))
 
 (defn mytest
@@ -305,4 +304,3 @@
        (remove nil?)
        edn-ld.core/subjectify
        (write-file "output.owl" default-context)))
-

@@ -9,4 +9,3 @@
 (def owl "http://www.w3.org/2002/07/owl#")
 
 (def default-context {:rdf rdf :rdfs rdfs :xsd xsd :owl owl})
-

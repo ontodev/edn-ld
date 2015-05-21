@@ -5,4 +5,5 @@
             :url "http://opensource.org/licenses/BSD-3-Clause"}
   :dependencies [[org.clojure/clojure "1.7.0-beta3"]
                  [prismatic/schema "0.4.2"]
-                 [org.codehaus.woodstox/woodstox-core-asl "4.3.0"]])
+                 [org.codehaus.woodstox/woodstox-core-asl "4.3.0"]]
+  :plugins [[lein-cljfmt "0.1.10"]])

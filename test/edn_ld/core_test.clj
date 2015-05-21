@@ -14,10 +14,10 @@
 (defmacro invalid!
   "Assert that x does not satisfy schema s, optionally checking the stringified return value"
   ([s x]
-     `(~'is (s/check ~s ~x)))
+   `(~'is (s/check ~s ~x)))
   ([s x expected]
-     `(do (invalid! ~s ~x)
-          (sm/if-cljs nil (~'is (= ~expected (pr-str (s/check ~s ~x))))))))
+   `(do (invalid! ~s ~x)
+        (sm/if-cljs nil (~'is (= ~expected (pr-str (s/check ~s ~x))))))))
 
 ;; For now, any string is a valid IRI.
 
@@ -37,20 +37,20 @@
 
 (deftest test-expand
   (are [x y]  (= (expand context x) y)
-       nil     nil
-       123     123
-       :foo    "http://example.com/foo"
-       :ex     "http://example.com/"
-       :ex:bar "http://example.com/bar"
-       :baz    "http://example.com/baz"))
+    nil     nil
+    123     123
+    :foo    "http://example.com/foo"
+    :ex     "http://example.com/"
+    :ex:bar "http://example.com/bar"
+    :baz    "http://example.com/baz"))
 
 (deftest test-contract
   (are [x y] (= (contract context x) y)
-       nil       nil
-       123       123
-       "foo"     "foo"
-       "http://example.com/foo" :foo
-       "http://example.com/bar" :bar))
+    nil       nil
+    123       123
+    "foo"     "foo"
+    "http://example.com/foo" :foo
+    "http://example.com/bar" :bar))
 
 (deftest test-literals
   (invalid! Literal nil)
@@ -85,10 +85,10 @@
 
 (deftest test-objectify
   (are [x y] (= (objectify x) y)
-       nil   nil
-       :foo  :foo
-       "foo" {:value "foo"}
-       123   {:value "123" :type :xsd:integer})
+    nil   nil
+    :foo  :foo
+    "foo" {:value "foo"}
+    123   {:value "123" :type :xsd:integer})
   (is (= (objectify {"foo" :foo} "foo") :foo)))
 
 (deftest test-triplify
@@ -120,25 +120,24 @@
 
 (deftest test-subjectify
   (is (= (subjectify
-           [[:subject :predicate :object]
-            [:subject :predicate "Object" :xsd:string]])
+          [[:subject :predicate :object]
+           [:subject :predicate "Object" :xsd:string]])
          {:subject {:predicate #{:object {:value "Object"}}}})))
 
 (deftest test-graphify
   (is (= (graphify
-           [[:graph :subject :predicate :object]
-            [:graph :subject :predicate "Object" :xsd:string]])
+          [[:graph :subject :predicate :object]
+           [:graph :subject :predicate "Object" :xsd:string]])
          {:graph {:subject {:predicate #{:object {:value "Object"}}}}})))
 
 (deftest test-flatten-subjects
   (is (= (set (flatten-subjects
-                {:subject {:predicate #{:object {:value "Object"}}}}))
+               {:subject {:predicate #{:object {:value "Object"}}}}))
          #{[:subject :predicate :object]
            [:subject :predicate "Object" :xsd:string]})))
 
 (deftest test-flatten-graphs
   (is (= (set (flatten-graphs
-                {:graph {:subject {:predicate #{:object {:value "Object"}}}}}))
+               {:graph {:subject {:predicate #{:object {:value "Object"}}}}}))
          #{[:graph :subject :predicate :object]
            [:graph :subject :predicate "Object" :xsd:string]})))
-

@@ -40,4 +40,3 @@
      (map (partial apply run-test))
      doall
      (apply = true))
-
