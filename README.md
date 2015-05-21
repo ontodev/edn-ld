@@ -219,6 +219,18 @@ By adding the name of a graph, our *triples* become *quads* ("quadruples"). We d
 Note that RDFXML format doesn't support named graphs and quads.
 
 
+## Change Log
+
+- 0.2.0-SNAPSHOT (current Git `master`)
+    - fix `triplify` functions to use `:subject-iri` key
+    - add `quadruplify` and `graphify` functions, using `:graph-iri` key
+    - rename `squash` functions to `flatten`
+    - fix `flatten` functions
+    - many more unit tests
+- 0.1.0
+    - first release
+
+
 ## To Do
 
 - use Apache Jena for reading and writing
