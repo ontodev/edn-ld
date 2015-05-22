@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [clojure.string :as string]
             [schema.core :as s]
-            [edn-ld.core :refer :all]))
+            [edn-ld.core :refer :all]
+            [edn-ld.common :refer [rdf xsd]]))
 
 ; These macros are borrowed from
 ; https://github.com/Prismatic/schema/blob/master/test/clj/schema/test_macros.clj
@@ -63,7 +64,7 @@
   (invalid! Literal {:value "foo" :type "bar" :lang "en"})
   (valid! Literal {:value "foo"})
   (valid! Literal {:value "foo" :type "bar"})
-  (valid! Literal {:value "foo" :type :rdf:langString :lang "en"})
+  (valid! Literal {:value "foo" :lang "en"})
   (is (= (literal "foo")
          {:value "foo"}))
   (is (= (literal 123)
@@ -71,7 +72,7 @@
   (is (= (literal "foo" "bar")
          {:value "foo" :type "bar"}))
   (is (= (literal "foo" "@bar")
-         {:value "foo" :type :rdf:langString :lang "bar"})))
+         {:value "foo" :lang "bar"})))
 
 (deftest test-flatten-triples
   (is (= (flatten-triples :s :p :o)
@@ -97,7 +98,7 @@
          [[:subject :predicate :object]]))
   (is (= (triplify {:subject-iri :subject
                     :predicate   "Object"})
-         [[:subject :predicate "Object" :xsd:string]]))
+         [[:subject :predicate {:value "Object"}]]))
   (is (= (triplify {"Object" :object}
                    {:subject-iri :subject
                     :predicate   "Object"})
@@ -111,7 +112,7 @@
   (is (= (quadruplify {:subject-iri :subject
                        :graph-iri   :graph
                        :predicate   "Object"})
-         [[:graph :subject :predicate "Object" :xsd:string]]))
+         [[:graph :subject :predicate {:value "Object"}]]))
   (is (= (quadruplify {"Object" :object}
                       {:subject-iri :subject
                        :graph-iri   :graph

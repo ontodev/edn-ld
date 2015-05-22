@@ -163,12 +163,12 @@ The `objectify` function takes a resource map and a value, and determines whethe
 
 Now we can treat each map as a set of statements about a resources, and `triplify` it to a lazy sequence of triples. The format will be "flat triples", a list with slots for: subject, predicate, object, type, and lang.
 
-The `triplify` function takes our resource map, the keyword to use for setting the subject, and a map of data that includes a `:subject-iri` key. It returns a lazy sequence of flat triples.
+The `triplify` function takes our resource map and a map of data that includes a `:subject-iri` key. It returns a lazy sequence of triples.
 
     user=> (def triples (triplify resources book))
     #'user/triples
     user=> (vec triples)
-    [[:the-iliad :title "The Iliad" :xsd:string] [:the-iliad :author :Homer]]
+    [[:the-iliad :title {:value "The Iliad"}] [:the-iliad :author :Homer]]
 
 You'll notice that the subject `:the-iliad` is repeated here. With a larger set of triples the redundancy will be greater. Instead we can use a nested data structure:
 
@@ -203,7 +203,7 @@ Now, we can write to standard linked data formats, such as RDFXML:
 
 One more thing before we're done: *named graphs*. A graph is just a set of triples. When we want to talk about a particular graph, we give it a name: an IRI, of course. Then we can talk about sets of named graphs when we want to compare them, merge them, etc. The official name for a set of graphs is an "[RDF dataset](http://www.w3.org/TR/rdf11-concepts/#section-dataset)". A dataset includes "default graph" with no name.
 
-By adding the name of a graph, our *triples* become *quads* ("quadruples"). We define a FlatQuad and some new functions to handle them.
+By adding the name of a graph, our *triples* become *quads* ("quadruples"). We define a quad and some new functions to handle them.
 
     user=> (def library [(assoc book :graph-iri :library)])
     #'user/library
@@ -212,7 +212,7 @@ By adding the name of a graph, our *triples* become *quads* ("quadruples"). We d
     user=> (def quads (quadruplify-all resources library))
     #'user/quads
     user=> (vec quads)
-    [[:library :the-iliad :title "The Iliad" :xsd:string] [:library :the-iliad :author :Homer]]
+    [[:library :the-iliad :title {:value "The Iliad"}] [:library :the-iliad :author :Homer]]
     user=> (graphify quads)
     {:library {:the-iliad {:title #{{:value "The Iliad"}}, :author #{:Homer}}}}
 
@@ -227,6 +227,7 @@ Note that RDFXML format doesn't support named graphs and quads.
     - rename `squash` functions to `flatten`
     - fix `flatten` functions
     - many more unit tests
+    - prefer Triples to FlatTriples
 - 0.1.0
     - first release
 

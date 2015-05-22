@@ -36,12 +36,28 @@
 
 (def Contraction s/Keyword)
 
-;; To move between IRIs and Contractions we'll use a Context.
+;; To move between IRIs and Contractions we'll use a PrefixMap or a Context.
+;; A PrefixMap is just a map from prefix keywords to IRIs.
+
+(def PrefixMap {(s/maybe s/Keyword) IRI})
+
 ;; A Context is just a map from Contractions to Contractions or IRIs.
 
 (def Context {(s/maybe Contraction) (s/either Contraction IRI)})
 
-;; We'll expand a contracted IRI by recursively looking up keys.
+;; Contexts can be recursive, so they're more convenient to use,
+;; but when specifying output formats we'll need to use a PrefixMap.
+;; To move from a Context to a PrefixMap, this function is usually sufficient:
+
+(defn get-prefixes
+  "Given a Context, return a PrefixMap
+   by removing pairs where the value is not a string."
+  [context]
+  (->> context
+       (filter #(string? (val %)))
+       (into {})))
+
+;; We'll expand a contracted IRI in a Context by recursively looking up keys.
 ;; Since the recursion should not be very deep, we won't bother using `loop`.
 ;; Since Contractions are all keywords, we just return any other type of input.
 ;; We'll ignore some special keywords used later for Literals.
@@ -75,11 +91,16 @@
     (catch StackOverflowError e input)))
 
 (defn expand-all
-  "Given a Context and some collection,
+  "Given an optional Context and some collection,
    try to expand all Contractions in the collection,
    and return the updated collection."
-  [context coll]
-  (clojure.walk/prewalk (partial expand context) coll))
+  ([coll]
+   (expand-all
+    {:rdf:langString (str rdf "langString")
+     :xsd:string     (str xsd "string")}
+    coll))
+  ([context coll]
+   (clojure.walk/prewalk (partial expand context) coll)))
 
 ;; Contracting an IRI is a little trickier.
 ;; First we consider the case where the IRI is exactly a value in the Context.
@@ -178,9 +199,10 @@
 
 (def TypedLiteral {:value Lexical :type Datatype})
 
-(def LangLiteral {:value Lexical
-                  :type  (s/enum (str rdf "langString") :rdf:langString)
-                  :lang  Lang})
+(def LangLiteral
+  {:value                 Lexical
+   (s/optional-key :type) (s/enum (str rdf "langString") :rdf:langString)
+   :lang                  Lang})
 
 (def Literal (s/either DefaultLiteral LangLiteral TypedLiteral))
 
@@ -221,7 +243,6 @@
    (cond
      lang
      {:value value
-      :type  :rdf:langString
       :lang  lang}
      (= type :xsd:string)
      {:value value}
@@ -282,14 +303,19 @@
      :else
      (literal input))))
 
-;; Now we can define a triple:
+;; Now we can define triples:
 
-(def ExpandedTriple [ExpandedSubject ExpandedPredicate ExpandedObject])
+(def ExpandedTriple  [ExpandedSubject ExpandedPredicate ExpandedObject])
+(def ExpandedTriples [ExpandedTriple])
 
-(def ContractedTriple [ContractedSubject ContractedPredicate ContractedObject])
+(def ContractedTriple  [ContractedSubject ContractedPredicate ContractedObject])
+(def ContractedTriples [ContractedTriple])
 
-;; These definitions of a triples are the clearest, but not the most convenient.
-;; Instead, we usually want to work with a "FlatTriple",
+(def Triple  ContractedTriple)
+(def Triples ContractedTriples)
+
+;; If we want to write our triples to a table of strings
+;; we can use the FlatTriple format,
 ;; which is just a sequence with three, four, or five values:
 ;;
 ;; - three values when the object is not a Literal
@@ -317,6 +343,20 @@
 ;; that will be used to specify the subject of the triple.
 ;; The `:subject-iri` key is not treated as a predicate.
 
+(defn flatten-literal
+  "Given a literal map and options, return a vector representation.
+   Option :expand will return default types as IRI instead of Contractions."
+  [{:keys [value type lang] :as literal}]
+  (cond
+    lang
+    [value :rdf:langString lang]
+    type
+    [value type]
+    value
+    [value :xsd:string]
+    :else
+    (throw (Exception. "Literal map must have a :value."))))
+
 (defmulti flatten-triples
   "Given a Subject, a Predicate, and an Object,
    return a sequence of FlatTriples (usually containing just one FlatTriple)."
@@ -331,34 +371,24 @@
   [[subject predicate object]])
 
 (defmethod flatten-triples java.util.Map
-  [subject predicate {:keys [value type lang] :as object}]
-  (cond
-    lang
-    [[subject predicate value :rdf:langString lang]]
-    type
-    [[subject predicate value type]]
-    value
-    [[subject predicate value :xsd:string]]
-    :else
-    (throw (Exception. "Literal map must have a :value."))))
+  [subject predicate object]
+  [(into [subject predicate] (flatten-literal object))])
 
 (defn triplify-one
   "Given an optional ResourceMap, a Subject, a Predicate, and an Object,
-   return a sequence of FlatTriples (usually containing just one FlatTriple).
+   return a Triple.
    Tries to avoid circular references where subject and object are the same."
   ([subject predicate object]
    (triplify-one nil subject predicate object))
   ([resources subject predicate object]
-   (let [flat-triples
-         (flatten-triples subject predicate (objectify resources object))]
-     (if (= subject (nth (first flat-triples) 2))
-       (triplify-one nil subject predicate object)
-       flat-triples))))
+   (if (= subject (objectify resources object))
+     [subject predicate (objectify nil object)]
+     [subject predicate (objectify resources object)])))
 
 (defn triplify
   "Given an optional ResourceMap and a map of data
    that has a :subject-iri key,
-   return a lazy sequence of FlatTriples."
+   return a lazy sequence of Triples."
   ([input-map]
    (triplify nil input-map))
   ([resources input-map]
@@ -366,18 +396,18 @@
         (map (juxt (constantly (:subject-iri input-map)) key val))
         ; remove special keys :subject-iri and :graph-iri
         (remove #(contains? #{:subject-iri :graph-iri} (second %)))
-        (mapcat (partial apply triplify-one resources)))))
+        (map (partial apply triplify-one resources)))))
 
 (defn triplify-all
   "Given an optional ResourceMap and a sequence of input maps
    where each map has a :subject-iri key,
-   return a lazy sequence of FlatTriples."
+   return a lazy sequence of Triples."
   ([input-maps]
    (triplify-all nil input-maps))
   ([resources input-maps]
    (mapcat (partial triplify resources) input-maps)))
 
-;; FlatTriples are convenient for streaming, but not for everything.
+;; Triples are convenient for streaming, but not for everything.
 ;; They can be quite redundant.
 ;; We also define a nested data structure called a SubjectMap.
 ;; From the inside out, it works like this:
@@ -392,10 +422,10 @@
 
 (def SubjectMap {ContractedSubject PredicateMap})
 
-;; The `subjectify` function rolls a sequence of FlatTriples into a SubjectMap.
+;; The `subjectify` function rolls a sequence of Triples into a SubjectMap.
 
 (defn subjectify
-  "Given a sequence of FlatTriples, return a SubjectMap."
+  "Given a sequence of Triples, return a SubjectMap."
   [flat-triples]
   (reduce
    (fn [coll [subject predicate object datatype lang]]
@@ -409,10 +439,10 @@
    nil
    flat-triples))
 
-;; We can also go the other way, from SubjectMap to FlatTriples.
+;; We can also go the other way, from SubjectMap to Triples.
 
 (defn flatten-subjects
-  "Given a SubjectMap, return a lazy sequnce of FlatTriples."
+  "Given a SubjectMap, return a lazy sequnce of Triples."
   [subject-map]
   (apply
    concat
@@ -458,18 +488,17 @@
 
 (defn quadruplify-one
   "Given an optional ResourceMap, a GraphName, a Subject, a Predicate,
-   and an Object, return a FlatQuad.
+   and an Object, return a Quad.
    Tries to avoid circular references where subject and object are the same."
   ([graph subject predicate object]
    (quadruplify-one nil subject predicate object))
   ([resources graph subject predicate object]
-   (map (partial into [graph])
-        (triplify-one resources subject predicate object))))
+   (into [graph] (triplify-one resources subject predicate object))))
 
 (defn quadruplify
   "Given an optional ResourceMap and a map of data
    that includes :subject-iri and :graph-iri keys,
-   return a lazy sequence of FlatQuads."
+   return a lazy sequence of Quads."
   ([input-map]
    (quadruplify nil input-map))
   ([resources input-map]
@@ -480,12 +509,12 @@
                    val))
         ; remove special keys :subject-iri and :graph-iri
         (remove #(contains? #{:subject-iri :graph-iri} (nth % 2)))
-        (mapcat (partial apply quadruplify-one resources)))))
+        (map (partial apply quadruplify-one resources)))))
 
 (defn quadruplify-all
   "Given an optional ResourceMap and a sequence of input maps
    where each map has :subject-iri and :graph-iri keys,
-   return a lazy sequence of FlatQuads."
+   return a lazy sequence of Quads."
   ([input-maps]
    (quadruplify-all nil input-maps))
   ([resources input-maps]
@@ -499,7 +528,7 @@
 (def GraphMap {ContractedGraphName SubjectMap})
 
 (defn graphify
-  "Given a sequence of FlatQuads, return a GraphMap."
+  "Given a sequence of Quads, return a GraphMap."
   [flat-quads]
   (reduce
    (fn [coll [graph subject predicate object datatype lang]]
@@ -514,7 +543,7 @@
    flat-quads))
 
 (defn flatten-graphs
-  "Given a GraphMap, return a lazy sequnce of FlatQuads."
+  "Given a GraphMap, return a lazy sequnce of Quads."
   [graph-map]
   (apply
    concat
