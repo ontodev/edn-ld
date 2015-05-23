@@ -34,7 +34,7 @@ EDN-LD is a Clojure library. The easiest way to get started is to use [Leiningen
 
 ## Tutorial
 
-Try out EDN-LD by cloning this project and starting a REPL:
+Try out EDN-LD with our [interactive online tutorial](http://try.edn-ld.com), or by cloning this project and starting a REPL:
 
     $ git clone https://github.com/ontodev/edn-ld.git
     $ cd edn-ld
