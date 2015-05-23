@@ -222,6 +222,7 @@ Note that RDFXML format doesn't support named graphs and quads.
 ## Change Log
 
 - 0.2.0-SNAPSHOT (current Git `master`)
+    - use Apache Jena for reading and writing
     - fix `triplify` functions to use `:subject-iri` key
     - add `quadruplify` and `graphify` functions, using `:graph-iri` key
     - rename `squash` functions to `flatten`
