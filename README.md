@@ -235,7 +235,6 @@ Note that RDFXML format doesn't support named graphs and quads.
 
 ## To Do
 
-- use Apache Jena for reading and writing
 - finish streaming RDFXML reader and writer
 - ClojureScript support? Would require different libraries for reading and writing
 
