@@ -27,7 +27,7 @@ EDN-LD is a simple linked data tool.
 
 EDN-LD is a Clojure library. The easiest way to get started is to use [Leiningen](http://leiningen.org) and add this to your `project.clj` dependencies:
 
-    [edn-ld "0.2.0"]
+    [edn-ld "0.2.1"]
 
 
 ## Tutorial
