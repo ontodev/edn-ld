@@ -189,17 +189,23 @@ We work with these data structures like any other Clojure data, using `merge`, `
     #'user/context+
     user=> (def subjects+ (assoc-in subjects [:the-iliad :rdf:type] #{:book}))
     #'user/subjects+
+    user=> (def triples+ (conj triples [:the-iliad :rdf:type :book]))
+    #'user/triples+
 
-Now, we can write to standard linked data formats, such as RDFXML:
+Now, we can write to standard linked data formats, such as Turtle:
 
-    user=> (edn-ld.rdfxml/write-string context+ (expand-all context+ subjects+))
-    <?xml version='1.0' encoding='UTF-8'?>
-    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ex="http://example.com/">
-        <ex:book rdf:about="http://example.com/the-iliad">
-            <dc:title>The Iliad</dc:title>
-            <dc:author rdf:resource="http://example.com/Homer"/>
-         </ex:book>
-    </rdf:RDF>
+    user=> (def prefixes (assoc (get-prefixes context) :rdf rdf :xsd xsd))
+    #'user/prefixes
+    user=> (def expanded-triples (map #(expand-all context+ %) triples+))
+    #'user/expanded-triples
+    user=> (edn-ld.jena/write-triple-string prefixes expanded-triples)
+    @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+    @prefix ex:    <http://example.com/> .
+    @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+    @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    ex:the-iliad  a    ex:book ;
+            dc:author  ex:Homer ;
+            dc:title   "The Iliad"^^xsd:string .
 
 One more thing before we're done: *named graphs*. A graph is just a set of triples. When we want to talk about a particular graph, we give it a name: an IRI, of course. Then we can talk about sets of named graphs when we want to compare them, merge them, etc. The official name for a set of graphs is an "[RDF dataset](http://www.w3.org/TR/rdf11-concepts/#section-dataset)". A dataset includes "default graph" with no name.
 
@@ -216,7 +222,6 @@ By adding the name of a graph, our *triples* become *quads* ("quadruples"). We d
     user=> (graphify quads)
     {:library {:the-iliad {:title #{{:value "The Iliad"}}, :author #{:Homer}}}}
 
-Note that RDFXML format doesn't support named graphs and quads.
 
 
 ## Change Log

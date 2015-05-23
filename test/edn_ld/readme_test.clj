@@ -9,6 +9,12 @@
 ;; execute anything marked "user=>",
 ;; and compare it to the expected output.
 
+(defn clean
+  [s]
+  (-> s
+      (string/replace #"(?m)\s+" " ")
+      string/trim))
+
 (def prompt "user=> ")
 
 (defn run-test
@@ -23,7 +29,7 @@
     ;(println "E" expected)
     ;(println "A" actual)
     ;(println (= actual expected))
-    (is (= expected actual))))
+    (is (= (clean expected) (clean actual)))))
 
 (->> "README.md"
      slurp
