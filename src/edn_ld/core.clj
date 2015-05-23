@@ -67,6 +67,13 @@
 ;; Be careful not to build a loop into your Context!
 ;; For example: `(expand {:foo :foo} :foo)`
 
+(def reserved-keywords #{:value :type :lang :subject-iri :graph-iri})
+
+(defn reserved?
+  "Return true if the input is a reserved keyword."
+  [input]
+  (contains? reserved-keywords input))
+
 (defn expand
   "Given a Context and some input (usually a Contraction),
    try to return an IRI string.
@@ -79,7 +86,7 @@
     (cond
       (not (keyword? input))
       input
-      (contains? #{:value :type :lang} input)
+      (reserved? input)
       input
       (find context input)
       (expand context (get context input))
