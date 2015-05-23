@@ -27,7 +27,7 @@ EDN-LD is a simple linked data tool.
 
 EDN-LD is a Clojure library. The easiest way to get started is to use [Leiningen](http://leiningen.org) and add this to your `project.clj` dependencies:
 
-    [edn-ld "0.1.0"]
+    [edn-ld "0.2.0"]
 
 
 ## Tutorial
@@ -221,7 +221,7 @@ Note that RDFXML format doesn't support named graphs and quads.
 
 ## Change Log
 
-- 0.2.0-SNAPSHOT (current Git `master`)
+- 0.2.0
     - use Apache Jena for reading and writing
     - fix `triplify` functions to use `:subject-iri` key
     - add `quadruplify` and `graphify` functions, using `:graph-iri` key

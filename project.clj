@@ -1,4 +1,4 @@
-(defproject edn-ld "0.2.0-SNAPSHOT"
+(defproject edn-ld "0.2.0"
   :description "A simple linked data tool"
   :url "https://github.com/ontodev/edn-ld"
   :license {:name "BSD 3-Clause License"
