@@ -66,7 +66,7 @@
     type
     (.createTypedLiteral model value (BaseDatatype. type))
     :else
-    (.createLiteral model value (BaseDatatype. (str xsd "string")))))
+    (.createTypedLiteral model value (BaseDatatype. (str xsd "string")))))
 
 (defn get-model
   "Given a PrefixMap and ExpandedTriples,
