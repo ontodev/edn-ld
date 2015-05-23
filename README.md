@@ -221,6 +221,8 @@ Note that RDFXML format doesn't support named graphs and quads.
 
 ## Change Log
 
+- 0.2.1
+    - fix bug in edn-ld.jena/make-node
 - 0.2.0
     - use Apache Jena for reading and writing
     - fix `triplify` functions to use `:subject-iri` key
