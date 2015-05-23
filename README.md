@@ -4,6 +4,8 @@
 
 EDN-LD is a set of conventions and a library for working with [Linked Data (LD)](http://linkeddata.org) using [Extensible Data Notation (EDN)](https://github.com/edn-format/edn) and the [Clojure programming language](http://clojure.org). EDN-LD builds on EDN and [JSON-LD](http://json-ld.org), but is not otherwise affiliated with those projects.
 
+**[Try EDN-LD online!](http://try.edn-ld.com)**
+
 This project is in early development!
 
 
