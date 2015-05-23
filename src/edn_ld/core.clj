@@ -433,7 +433,7 @@
 
 (defn subjectify
   "Given a sequence of Triples, return a SubjectMap."
-  [flat-triples]
+  [triples]
   (reduce
    (fn [coll [subject predicate object datatype lang]]
      (update-in
@@ -444,7 +444,7 @@
         (literal object datatype lang)
         object)))
    nil
-   flat-triples))
+   triples))
 
 ;; We can also go the other way, from SubjectMap to Triples.
 
@@ -536,7 +536,7 @@
 
 (defn graphify
   "Given a sequence of Quads, return a GraphMap."
-  [flat-quads]
+  [quads]
   (reduce
    (fn [coll [graph subject predicate object datatype lang]]
      (update-in
@@ -547,7 +547,7 @@
         (literal object datatype lang)
         object)))
    nil
-   flat-quads))
+   quads))
 
 (defn flatten-graphs
   "Given a GraphMap, return a lazy sequnce of Quads."
