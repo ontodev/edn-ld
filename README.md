@@ -227,7 +227,7 @@ By adding the name of a graph, our *triples* become *quads* ("quadruples"). We d
 
 ## More
 
-- Conference paper about EDN-LD ([PDF](https://github.com/ontodev/icbo2015-edn-ld/blob/master/edn_ld.pdf), [source](https://github.com/ontodev/icbo2015-robot))
+- Conference paper about EDN-LD ([PDF](https://github.com/ontodev/icbo2015-edn-ld/blob/master/edn_ld.pdf), [source](https://github.com/ontodev/icbo2015-edn-ld))
 
 
 ## Change Log
