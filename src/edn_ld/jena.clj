@@ -6,7 +6,7 @@
            (com.hp.hpl.jena.graph Triple Node_URI Node_Blank Node_Literal)
            (com.hp.hpl.jena.sparql.core Quad)
            (org.apache.jena.riot.system StreamRDF)
-           (com.hp.hpl.jena.rdf.model ModelFactory AnonId)
+           (com.hp.hpl.jena.rdf.model ModelFactory RDFNode AnonId)
            (com.hp.hpl.jena.query DatasetFactory)
            (com.hp.hpl.jena.datatypes BaseDatatype)
            (org.apache.jena.riot RDFDataMgr RDFLanguages Lang)))
@@ -28,7 +28,7 @@
 
 (defmethod read-node Node_Blank
   [node]
-  (.getLabelString (.getBlankNodeId node)))
+  (str "_:" (.getLabelString (.getBlankNodeId node))))
 
 (defmethod read-node Node_Literal
   [node]
@@ -44,13 +44,29 @@
      (when-not (string/blank? lang)
        {:lang lang}))))
 
+(defmethod read-node RDFNode
+  [node]
+  (cond
+    (.isURIResource node)
+    (.getURI node)
+    (.isAnon node)
+    (str "_:" (.getLabelString (.getId (.asResource node))))
+    (.isLiteral node)
+    (let [value (.getLiteralLexicalForm node)
+          type  (.getLiteralDatatype node)
+          type  (when type (.getURI type))
+          lang  (.getLiteralLanguage node)]
+      (merge
+       {:value value}
+       (when type
+         (when (not= type (str xsd "string"))
+           {:type type}))
+       (when-not (string/blank? lang)
+         {:lang lang})))))
+
 (defmulti make-node
   "Given a model and an EDN-LD node, return a Jena Node."
   (fn [model node] (class node)))
-
-(defmethod read-node :default
-  [node]
-  nil)
 
 (defmethod make-node String
   [model node]

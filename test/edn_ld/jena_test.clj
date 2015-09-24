@@ -3,7 +3,8 @@
             [clojure.string :as string]
             [edn-ld.jena :refer :all]
             [edn-ld.common :refer [rdf xsd]])
-  (:import (org.apache.jena.riot Lang)))
+  (:import (org.apache.jena.riot Lang)
+           (com.hp.hpl.jena.rdf.model ModelFactory)))
 
 (deftest test-formats
   (are [x y] (= (get-format x) y)
@@ -53,3 +54,8 @@ ex:graph {
     (is (= (set quads) (set test2-edn))))
   (is (= (clean (write-quad-string {:ex ex} test2-edn))
          (clean test2-trig))))
+
+(deftest test-blank
+  (let [model (ModelFactory/createDefaultModel)
+        node  (make-node model "_:foo")]
+    (is (= (read-node node) "_:foo"))))
