@@ -4,7 +4,7 @@
             [edn-ld.jena :refer :all]
             [edn-ld.common :refer [rdf xsd]])
   (:import (org.apache.jena.riot Lang)
-           (com.hp.hpl.jena.rdf.model ModelFactory)))
+           (org.apache.jena.rdf.model ModelFactory)))
 
 (deftest test-formats
   (are [x y] (= (get-format x) y)
@@ -21,7 +21,7 @@
 
 (def test1-edn
   [[(str ex "subject") (str ex "predicate") (str ex "object")]
-   [(str ex "subject") (str ex "predicate") {:value "Object" :lang "en"}]])
+   [(str ex "subject") (str ex "predicate") {:value "Object" :type "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" :lang "en"}]])
 
 (defn clean
   [s]
@@ -36,6 +36,9 @@
   (is (= (clean (write-triple-string {:ex ex} test1-edn))
          (clean test1-turtle))))
 
+(comment
+  )
+
 (def test2-trig
   "@prefix ex: <http://example.com/> .
 ex:graph {
@@ -46,7 +49,7 @@ ex:graph {
 (def test2-edn
   [[(str ex "graph") (str ex "subject") (str ex "predicate") (str ex "object")]
    [(str ex "graph") (str ex "subject") (str ex "predicate")
-    {:value "Object" :lang "en"}]])
+    {:value "Object" :type "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" :lang "en"}]])
 
 (deftest test-quads
   (let [[prefixes quads] (read-quad-string test2-trig "trig")]
