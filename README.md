@@ -29,7 +29,7 @@ EDN-LD is a simple linked data tool.
 
 EDN-LD is a Clojure library. The easiest way to get started is to use [Leiningen](http://leiningen.org) and add this to your `project.clj` dependencies:
 
-    [edn-ld "0.2.2"]
+    [edn-ld "0.3.0"]
 
 
 ## Tutorial
@@ -205,11 +205,11 @@ Now, we can write to standard linked data formats, such as Turtle:
     @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
     @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
     @prefix dc:    <http://purl.org/dc/elements/1.1/> .
-    
+
     ex:the-iliad  a    ex:book ;
             dc:author  ex:Homer ;
             dc:title   "The Iliad"^^xsd:string .
-    
+
 One more thing before we're done: *named graphs*. A graph is just a set of triples. When we want to talk about a particular graph, we give it a name: an IRI, of course. Then we can talk about sets of named graphs when we want to compare them, merge them, etc. The official name for a set of graphs is an "[RDF dataset](http://www.w3.org/TR/rdf11-concepts/#section-dataset)". A dataset includes "default graph" with no name.
 
 By adding the name of a graph, our *triples* become *quads* ("quadruples"). We define a quad and some new functions to handle them.
@@ -233,6 +233,10 @@ By adding the name of a graph, our *triples* become *quads* ("quadruples"). We d
 
 ## Change Log
 
+- 0.3.0
+    - update to Jena 3.0.1
+- 0.2.2
+    - fix bug in blank node handling
 - 0.2.1
     - fix bug in edn-ld.jena/make-node
 - 0.2.0
