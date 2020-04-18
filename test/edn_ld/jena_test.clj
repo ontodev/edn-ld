@@ -36,9 +36,6 @@
   (is (= (clean (write-triple-string {:ex ex} test1-edn))
          (clean test1-turtle))))
 
-(comment
-  )
-
 (def test2-trig
   "@prefix ex: <http://example.com/> .
 ex:graph {
