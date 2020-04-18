@@ -201,14 +201,15 @@ Now, we can write to standard linked data formats, such as Turtle:
     user=> (def expanded-triples (map #(expand-all context+ %) triples+))
     #'user/expanded-triples
     user=> (edn-ld.jena/write-triple-string prefixes expanded-triples)
-    @prefix dc:    <http://purl.org/dc/elements/1.1/> .
     @prefix ex:    <http://example.com/> .
-    @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
     @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+    @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+    
     ex:the-iliad  a    ex:book ;
             dc:author  ex:Homer ;
             dc:title   "The Iliad"^^xsd:string .
-
+    
 One more thing before we're done: *named graphs*. A graph is just a set of triples. When we want to talk about a particular graph, we give it a name: an IRI, of course. Then we can talk about sets of named graphs when we want to compare them, merge them, etc. The official name for a set of graphs is an "[RDF dataset](http://www.w3.org/TR/rdf11-concepts/#section-dataset)". A dataset includes "default graph" with no name.
 
 By adding the name of a graph, our *triples* become *quads* ("quadruples"). We define a quad and some new functions to handle them.

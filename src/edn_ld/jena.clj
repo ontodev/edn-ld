@@ -3,12 +3,12 @@
             [clojure.java.io :as io]
             [edn-ld.common :refer [xsd default-prefixes]])
   (:import (java.io StringReader StringWriter)
-           (com.hp.hpl.jena.graph Triple Node_URI Node_Blank Node_Literal)
-           (com.hp.hpl.jena.sparql.core Quad)
+           (org.apache.jena.graph Triple Node_URI Node_Blank Node_Literal)
+           (org.apache.jena.sparql.core Quad)
            (org.apache.jena.riot.system StreamRDF)
-           (com.hp.hpl.jena.rdf.model ModelFactory RDFNode AnonId)
-           (com.hp.hpl.jena.query DatasetFactory)
-           (com.hp.hpl.jena.datatypes BaseDatatype)
+           (org.apache.jena.rdf.model ModelFactory RDFNode AnonId)
+           (org.apache.jena.query DatasetFactory)
+           (org.apache.jena.datatypes BaseDatatype)
            (org.apache.jena.riot RDFDataMgr RDFLanguages Lang)))
 
 
